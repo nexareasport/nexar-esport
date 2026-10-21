@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NEXAR ESPORTS</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --bg-color: #0d0d0d;
+            --card-bg: #1a1a1a;
+            --text-main: #ffffff;
+            --text-muted: #888888;
+            --accent-red: #d90000;
+            --accent-green: #00c853;
+            --border-color: #2a2a2a;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding-bottom: 70px;
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: #111;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0 20px 0;
+            z-index: 100;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--text-muted);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            width: 33%;
+        }
+
+        .nav-item.active { color: var(--accent-red); }
+        .nav-item svg { width: 24px; height: 24px; margin-bottom: 4px; fill: currentColor; }
+
+        /* Pages */
+        .page { display: none; padding: 16px; }
+        .page.active { display: block; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Header */
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .logo-text { font-size: 24px; font-weight: 900; letter-spacing: 1px; }
+        .logo-text span { color: var(--accent-red); }
+        .user-info { font-size: 12px; color: var(--text-muted); text-align: right; }
+        .user-info b { color: #fff; display: block; font-size: 14px; }
+
+        /* Banner */
+        .banner {
+            background: linear-gradient(135deg, #1a0000, #4a0000);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid #330000;
+            position: relative;
+            overflow: hidden;
+        }
+        .banner h1 { font-size: 22px; font-style: italic; margin-bottom: 5px; }
+        .banner p { font-size: 12px; color: #ffb3b3; letter-spacing: 2px; }
+
+        /* Sections */
+        .section-title { font-size: 16px; font-weight: bold; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;}
+        .section-title::before { content: ''; display: block; width: 4px; height: 16px; background: var(--accent-red); border-radius: 2px;}
+
+        /* Match Cards */
+        .match-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .match-header { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted); }
+        .match-players { display: flex; justify-content: space-between; align-items: center; background: #222; padding: 10px; border-radius: 8px; }
+        .player { font-weight: bold; font-size: 14px; text-align: center; width: 40%; }
+        .vs { color: var(--accent-red); font-weight: 900; font-style: italic; font-size: 18px; }
+        .match-footer { display: flex; justify-content: space-between; align-items: center; }
+        .prize { font-size: 12px; color: var(--accent-green); font-weight: bold; }
+        .btn-join {
+            background: var(--accent-red);
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        /* Profile & Settings */
+        .profile-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            margin-bottom: 20px;
+        }
+        .avatar { width: 80px; height: 80px; border-radius: 50%; background: #333; margin: 0 auto 12px auto; border: 2px solid var(--accent-red); }
+        
+        .settings-list {
+            background: var(--card-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            margin-bottom: 20px;
+        }
+        .settings-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 14px;
+        }
+        .settings-item:last-child { border-bottom: none; }
+        .settings-item span { color: var(--text-muted); font-size: 12px; display: block; margin-top: 4px;}
+        .toggle { width: 44px; height: 24px; background: #333; border-radius: 12px; position: relative; cursor: pointer; transition: 0.3s; }
+        .toggle::after { content: ''; position: absolute; width: 20px; height: 20px; background: #fff; border-radius: 50%; top: 2px; left: 2px; transition: 0.3s; }
+        .toggle.on { background: var(--accent-green); }
+        .toggle.on::after { left: 22px; }
+
+        /* Marketplace */
+        .marketplace-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        .marketplace-img { width: 60px; height: 60px; background: #333; border-radius: 8px; }
+        .marketplace-info h4 { font-size: 14px; margin-bottom: 4px; }
+        .marketplace-info p { font-size: 12px; color: var(--text-muted); }
+        .btn-buy { background: transparent; border: 1px solid var(--accent-red); color: var(--accent-red); padding: 6px 12px; border-radius: 6px; font-weight: bold; font-size: 12px; margin-left: auto; cursor: pointer;}
+    </style>
+</head>
+<body>
+
+    <!-- TURNIR PAGE -->
+    <div id="page-turnir" class="page active">
+        <div class="header">
+            <div class="logo-text">NEXAR<span>.</span></div>
+            <div class="user-info" id="user-greeting">Salom, Mehmon<br><b>ID: 123456789</b></div>
+        </div>
+
+        <div class="banner">
+            <h1>1V1 SHOW MATCH</h1>
+            <p>BIR O'YIN · BIR G'OLIB</p>
+            <div style="position: absolute; right: 10px; top: 10px; background: rgba(0,0,0,0.5); padding: 5px 10px; border-radius: 6px; font-size: 10px; border: 1px solid var(--accent-red);">30 UC</div>
+        </div>
+
+        <div class="section-title">BARCHA O'YINLAR</div>
+
+        <!-- Match 1 -->
+        <div class="match-card">
+            <div class="match-header"><span>1-O'YIN</span><span>Bugun, 21:00</span></div>
+            <div class="match-players">
+                <div class="player">sSs_ABU<br><span style="font-size:10px; color:#888;">ID: 514732</span></div>
+                <div class="vs">VS</div>
+                <div class="player">TT_ISCANDAROV<br><span style="font-size:10px; color:#888;">ID: 678912</span></div>
+            </div>
+            <div class="match-footer">
+                <div class="prize">🎁 30 UC</div>
+                <button class="btn-join" onclick="joinMatch(1)">QO'SHILISH ></button>
+            </div>
+        </div>
+
+        <!-- Match 2 -->
+        <div class="match-card">
+            <div class="match-header"><span>2-O'YIN</span><span>Bugun, 21:45</span></div>
+            <div class="match-players">
+                <div class="player">KillerX<br><span style="font-size:10px; color:#888;">ID: 523416</span></div>
+                <div class="vs">VS</div>
+                <div class="player">ZORIK<br><span style="font-size:10px; color:#888;">ID: 765432</span></div>
+            </div>
+            <div class="match-footer">
+                <div class="prize">🎁 30 UC</div>
+                <button class="btn-join" onclick="joinMatch(2)">QO'SHILISH ></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MARKETPLACE PAGE -->
+    <div id="page-marketplace" class="page">
+        <div class="header">
+            <div class="logo-text">MARKETPLACE</div>
+        </div>
+
+        <div class="section-title">AKKAUNT SAVDO</div>
+        <div class="marketplace-card">
+            <div class="marketplace-img"></div>
+            <div class="marketplace-info">
+                <h4>Mythic Account</h4>
+                <p>Daraja: 55 | Skinlar: 120+</p>
+                <p style="color: var(--accent-green); margin-top: 4px;">1,200,000 so'm</p>
+            </div>
+            <button class="btn-buy" onclick="buyProduct('Mythic Account')">OLISH</button>
+        </div>
+
+        <div class="marketplace-card">
+            <div class="marketplace-img"></div>
+            <div class="marketplace-info">
+                <h4>UC Service</h4>
+                <p>Tez va ishonchli</p>
+                <p style="color: var(--accent-green); margin-top: 4px;">Kelishilgan narxda</p>
+            </div>
+            <button class="btn-buy" onclick="buyProduct('UC Service')">OLISH</button>
+        </div>
+    </div>
+
+    <!-- PROFIL PAGE -->
+    <div id="page-profil" class="page">
+        <div class="header">
+            <div class="logo-text">PROFIL</div>
+        </div>
+
+        <div class="profile-card">
+            <div class="avatar" id="profile-avatar"></div>
+            <h3 id="profile-name">@username</h3>
+            <p style="color: var(--text-muted); font-size: 12px;" id="profile-id">ID: 123456789</p>
+            
+            <div style="display: flex; gap: 8px; margin-top: 16px; justify-content: center;">
+                <div style="background: #222; padding: 8px 16px; border-radius: 8px; font-size: 12px; border: 1px solid #333;">PUBG: <b id="pubg-nick">Kiritilmagan</b></div>
+                <div style="background: #222; padding: 8px 16px; border-radius: 8px; font-size: 12px; border: 1px solid #333;">ID: <b id="pubg-id">Yo'q</b></div>
+            </div>
+        </div>
+
+        <div class="section-title">SOZLAMALAR</div>
+        <div class="settings-list">
+            <div class="settings-item" onclick="toggleTheme()">
+                <div>Tungi rejim <span>Qorong'i mavzu</span></div>
+                <div class="toggle on" id="theme-toggle"></div>
+            </div>
+            <div class="settings-item" onclick="tg.openTelegramLink('https://t.me/nexar_admin')">
+                <div>Qo'llab-quvvatlash <span>Biz bilan bog'laning</span></div>
+                <div style="color:#888;">></div>
+            </div>
+            <div class="settings-item">
+                <div>Yangiliklar <span>Kanalimiz</span></div>
+                <div style="color:#888;">></div>
+            </div>
+            <div class="settings-item">
+                <div>Foydalanish shartlari <span>Qoidalar</span></div>
+                <div style="color:#888;">></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- BOTTOM NAVIGATION -->
+    <div class="bottom-nav">
+        <div class="nav-item active" onclick="switchTab('turnir', this)">
+            <svg viewBox="0 0 24 24"><path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63 3.61 2.96V19H7v2h10v-2h-4v-3.1c1.63-.33 2.98-1.46 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM5 8V7h2v3.82C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z"/></svg>
+            TURNIR
+        </div>
+        <div class="nav-item" onclick="switchTab('marketplace', this)">
+            <svg viewBox="0 0 24 24"><path d="M18 6h-2c0-2.21-1.79-4-4-4S8 3.79 8 6H6c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-6-2c1.1 0 2 .9 2 2h-4c0-1.1.9-2 2-2zm6 16H6V8h12v12z"/></svg>
+            MARKETPLACE
+        </div>
+        <div class="nav-item" onclick="switchTab('profil', this)">
+            <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+            PROFIL
+        </div>
+    </div>
+
+    <script>
+        // Telegram WebApp ni ishga tushirish
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand();
+
+        // Foydalanuvchi ma'lumotlarini olish
+        const user = tg.initDataUnsafe?.user;
+        if (user) {
+            document.getElementById('user-greeting').innerHTML = `Salom, @${user.username || user.first_name}<br><b>ID: ${user.id}</b>`;
+            document.getElementById('profile-name').textContent = `@${user.username || user.first_name}`;
+            document.getElementById('profile-id').textContent = `ID: ${user.id}`;
+            if (user.photo_url) {
+                document.getElementById('profile-avatar').style.backgroundImage = `url(${user.photo_url})`;
+                document.getElementById('profile-avatar').style.backgroundSize = 'cover';
+            }
+        }
+
+        // Tab almashtirish funksiyasi
+        function switchTab(tabName, element) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            
+            document.getElementById(`page-${tabName}`).classList.add('active');
+            element.classList.add('active');
+        }
+
+        // Tungi rejim almashtirish (hozircha faqat vizual)
+        function toggleTheme() {
+            const toggle = document.getElementById('theme-toggle');
+            toggle.classList.toggle('on');
+            // Haqiqiy loyihada bu yerda user sozlamalari bazaga saqlanadi
+        }
+
+        // O'yinga qo'shilish
+        function joinMatch(matchId) {
+            tg.showAlert(`Siz ${matchId}-o'yinga qo'shilish uchun ariza yubordingiz! (Demo)`);
+            // Haqiqiy loyihada: fetch('/api/join', { method: 'POST', body: JSON.stringify({matchId}) })
+        }
+
+        // Mahsulot sotib olish
+        function buyProduct(productName) {
+            const adminUsername = 'nexar_admin';
+            const text = `Salom! Men "${productName}" mahsulotini sotib olmoqchiman.`;
+            tg.openTelegramLink(`https://t.me/${adminUsername}?text=${encodeURIComponent(text)}`);
+        }
+    </script>
+</body>
+</html>
